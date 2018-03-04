@@ -1,0 +1,7 @@
+FROM golang:latest
+
+RUN mkdir -p /go/src/timekeeper
+WORKDIR /go/src/timekeeper
+
+RUN go get github.com/codegangsta/gin github.com/gin-gonic/gin \
+	github.com/jinzhu/gorm github.com/lib/pq

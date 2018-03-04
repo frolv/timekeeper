@@ -1,0 +1,29 @@
+version: '2'
+services:
+  timekeeper:
+    build:
+      context: .
+      dockerfile: ./config/Dockerfile.development
+    command: gin -i main.go
+    ports:
+      - 8008:3000
+    volumes:
+      - .:/go/src/timekeeper
+    depends_on:
+      - postgres
+    environment:
+      APP_ENV: development
+      DB_HOST: postgres
+      DB_USER: tk
+      DB_NAME: tk_development
+  postgres:
+    image: postgres:latest
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: tk
+      POSTGRES_DB: tk_development
+  redis:
+    image: redis:alpine
+    ports:
+      - 6379:6379
