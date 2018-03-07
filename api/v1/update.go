@@ -6,7 +6,7 @@ import (
 )
 
 func updateAccount(c *gin.Context) {
-	username := c.Query("username")
+	username := c.Param("username")
 
 	if err := models.UpdateAccount(username); err != nil {
 		code, json := handleAccountError(err)
