@@ -33,4 +33,6 @@ func init() {
 
 func performMigrations() {
 	db.AutoMigrate(&Account{})
+	db.AutoMigrate(&Datapoint{})
+	db.AutoMigrate(&SkillLevel{})
 }
