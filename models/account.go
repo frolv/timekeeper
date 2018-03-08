@@ -1,11 +1,13 @@
 package models
 
 import (
+	"errors"
 	"fmt"
-	"github.com/jinzhu/gorm"
 	"time"
-	"timekeeper/lib/osrs"
 	"unicode"
+
+	"github.com/jinzhu/gorm"
+	"timekeeper/lib/osrs"
 )
 
 type Account struct {
@@ -69,6 +71,17 @@ func UpdateAccount(username string) error {
 	}
 
 	return nil
+}
+
+// Look up an account by username.
+func GetAccount(username string) (*Account, error) {
+	var account Account
+
+	if err := db.First(&account, "username = ?", username).Error; err != nil {
+		return nil, errors.New("Account has not been tracked")
+	} else {
+		return &account, nil
+	}
 }
 
 func validUsername(username string) bool {

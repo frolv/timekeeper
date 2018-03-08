@@ -1,6 +1,8 @@
 package models
 
 import (
+	"errors"
+
 	"github.com/jinzhu/gorm"
 	"timekeeper/lib/osrs"
 )
@@ -21,6 +23,21 @@ type SkillLevel struct {
 	Level       int
 	Rank        int
 	Hours       float64
+}
+
+// Fetches the latest datapoint for an account.
+func GetLatestDatapoint(acc *Account) (*Datapoint, error) {
+	var dp Datapoint
+
+	if acc == nil {
+		return nil, errors.New("No account provided")
+	}
+
+	db.Preload("SkillLevels", func(db *gorm.DB) *gorm.DB {
+		return db.Order(`"skill_levels"."id" ASC`)
+	}).Where("account_id = ?", acc.ID).Last(&dp)
+
+	return &dp, nil
 }
 
 // Fetch current account stats from the OSRS API and create
