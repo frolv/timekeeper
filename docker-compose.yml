@@ -16,6 +16,8 @@ services:
       DB_HOST: postgres
       DB_USER: tk
       DB_NAME: tk_development
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
   postgres:
     image: postgres:latest
     ports:

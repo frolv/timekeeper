@@ -3,5 +3,8 @@ FROM golang:latest
 RUN mkdir -p /go/src/timekeeper
 WORKDIR /go/src/timekeeper
 
-RUN go get github.com/codegangsta/gin github.com/gin-gonic/gin \
-	github.com/jinzhu/gorm github.com/lib/pq
+RUN go get github.com/codegangsta/gin
+RUN go get github.com/gin-gonic/gin
+RUN go get github.com/jinzhu/gorm
+RUN go get github.com/lib/pq
+RUN go get github.com/go-redis/redis
