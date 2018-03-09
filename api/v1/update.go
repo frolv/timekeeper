@@ -2,16 +2,19 @@ package apiv1
 
 import (
 	"github.com/gin-gonic/gin"
+	"timekeeper/lib/cache"
 	"timekeeper/models"
 )
 
 func updateAccount(c *gin.Context) {
 	username := c.Param("username")
 
-	if err := models.UpdateAccount(username); err != nil {
+	acc, err := models.UpdateAccount(username)
+	if err != nil {
 		code, json := handleAccountError(err)
 		c.JSON(code, json)
 	} else {
+		cache.InvalidateAccount(acc)
 		c.JSON(200, gin.H{"status": "success"})
 	}
 }

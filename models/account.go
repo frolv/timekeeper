@@ -33,9 +33,9 @@ func (e *UpdateError) Error() string {
 }
 
 // Create a new datapoint for the account with the specified username.
-func UpdateAccount(username string) error {
+func UpdateAccount(username string) (*Account, error) {
 	if !validUsername(username) {
-		return &UpdateError{UEInvalidUsername, "Invalid username"}
+		return nil, &UpdateError{UEInvalidUsername, "Invalid username"}
 	}
 
 	var account Account
@@ -47,14 +47,14 @@ func UpdateAccount(username string) error {
 			first = true
 		} else {
 			fmt.Println(err.Error())
-			return err
+			return nil, err
 		}
 	} else {
 		var dp Datapoint
 		db.Where("account_id = ?", account.ID).Last(&dp)
 
 		if time.Since(dp.CreatedAt) < time.Duration(30*time.Second) {
-			return &UpdateError{
+			return nil, &UpdateError{
 				UERecentUpdate,
 				"Account updated less than 30s ago",
 			}
@@ -63,14 +63,14 @@ func UpdateAccount(username string) error {
 
 	if err := createDatapoint(&account, first); err != nil {
 		if e, ok := err.(*osrs.HiscoreError); ok {
-			return &UpdateError{e.Type, e.Message}
+			return nil, &UpdateError{e.Type, e.Message}
 		} else {
 			fmt.Println(err.Error())
-			return err
+			return nil, err
 		}
 	}
 
-	return nil
+	return &account, nil
 }
 
 // Look up an account by username.
