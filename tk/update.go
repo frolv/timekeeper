@@ -1,20 +1,12 @@
-package models
+package tk
 
 import (
-	"errors"
 	"fmt"
 	"time"
-	"unicode"
 
 	"github.com/jinzhu/gorm"
 	"timekeeper/lib/osrs"
 )
-
-type Account struct {
-	gorm.Model
-	Username   string `gorm:"unique_index"`
-	Datapoints []Datapoint
-}
 
 type UpdateError struct {
 	Type    int
@@ -73,25 +65,32 @@ func UpdateAccount(username string) (*Account, error) {
 	return &account, nil
 }
 
-// Look up an account by username.
-func GetAccount(username string) (*Account, error) {
-	var account Account
-
-	if err := db.First(&account, "username = ?", username).Error; err != nil {
-		return nil, errors.New("Account has not been tracked")
-	} else {
-		return &account, nil
+// Fetch current account stats from the OSRS API and create
+// a new datapoint for the specified account.
+func createDatapoint(account *Account, first bool) error {
+	skills, err := osrs.HiscoreLookup(account.Username)
+	if err != nil {
+		return err
 	}
-}
 
-func validUsername(username string) bool {
-	valid := true
-	for _, c := range username {
-		if !unicode.IsDigit(c) && !unicode.IsLetter(c) && c != '_' {
-			valid = false
-			break
+	if first {
+		db.Create(account)
+	}
+
+	dp := Datapoint{AccountID: account.ID}
+	db.Create(&dp)
+
+	for _, sk := range skills {
+		sl := SkillLevel{
+			DatapointID: dp.ID,
+			SkillID:     sk.ID,
+			Experience:  sk.Experience,
+			Level:       sk.Level,
+			Rank:        sk.Rank,
+			Hours:       sk.Hours,
 		}
+		db.Create(&sl)
 	}
 
-	return valid && len(username) > 0 && len(username) <= 12
+	return nil
 }

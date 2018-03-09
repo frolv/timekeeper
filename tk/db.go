@@ -1,4 +1,4 @@
-package models
+package tk
 
 import (
 	"fmt"
@@ -29,10 +29,4 @@ func init() {
 
 	fmt.Println("Database connection initialized")
 	performMigrations()
-}
-
-func performMigrations() {
-	db.AutoMigrate(&Account{})
-	db.AutoMigrate(&Datapoint{})
-	db.AutoMigrate(&SkillLevel{})
 }

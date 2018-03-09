@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/go-redis/redis"
-	"timekeeper/models"
+	"timekeeper/tk"
 )
 
 var client *redis.Client
@@ -36,7 +36,7 @@ func init() {
 	accKeys = make(map[string][]string)
 }
 
-func Set(key string, val string, acc *models.Account) {
+func Set(key string, val string, acc *tk.Account) {
 	if acc != nil {
 		accKeys[acc.Username] = append(accKeys[acc.Username], key)
 	}
@@ -48,7 +48,7 @@ func Get(key string) (string, error) {
 }
 
 // Invalidate all cached keys for the specified account.
-func InvalidateAccount(acc *models.Account) {
+func InvalidateAccount(acc *tk.Account) {
 	if acc == nil {
 		return
 	}

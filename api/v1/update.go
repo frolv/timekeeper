@@ -3,13 +3,13 @@ package apiv1
 import (
 	"github.com/gin-gonic/gin"
 	"timekeeper/lib/cache"
-	"timekeeper/models"
+	"timekeeper/tk"
 )
 
 func updateAccount(c *gin.Context) {
 	username := c.Param("username")
 
-	acc, err := models.UpdateAccount(username)
+	acc, err := tk.UpdateAccount(username)
 	if err != nil {
 		code, json := handleAccountError(err)
 		c.JSON(code, json)
@@ -24,10 +24,10 @@ func handleAccountError(err error) (int, gin.H) {
 	var ecode int
 	var message string
 
-	if e, ok := err.(*models.UpdateError); ok {
+	if e, ok := err.(*tk.UpdateError); ok {
 		ecode = e.Type
 		switch ecode {
-		case models.UEInvalidUsername, models.UERecentUpdate:
+		case tk.UEInvalidUsername, tk.UERecentUpdate:
 			code = 400
 		default:
 			code = 500

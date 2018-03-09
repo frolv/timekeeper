@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"timekeeper/lib/cache"
 	"timekeeper/lib/osrs"
-	"timekeeper/models"
+	"timekeeper/tk"
 )
 
 type SkillInfo struct {
@@ -36,13 +36,13 @@ func lookupStats(c *gin.Context) {
 		return
 	}
 
-	acc, err := models.GetAccount(username)
+	acc, err := tk.GetAccount(username)
 	if err != nil {
 		c.JSON(404, gin.H{"status": "error", "errorMessage": err.Error()})
 		return
 	}
 
-	dp, _ := models.GetLatestDatapoint(acc)
+	dp, _ := tk.GetLatestDatapoint(acc)
 	res := StatsResponse{
 		Username:   acc.Username,
 		LastUpdate: dp.CreatedAt,
