@@ -1,0 +1,42 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.9
+      - image: circleci/postgres:10.3-alpine
+        environment:
+          POSTGRES_USER: tk
+          POSTGRES_DB: tk_test
+      - image: circleci/redis:4.0-alpine
+
+    working_directory: /go/src/timekeeper
+
+    environment:
+      APP_ENV: test
+      DB_HOST: localhost
+      DB_USER: tk
+      DB_NAME: tk_test
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - v1-pkg-cache
+
+      - run: go get github.com/gin-gonic/gin
+      - run: go get github.com/jinzhu/gorm
+      - run: go get github.com/lib/pq
+      - run: go get github.com/go-redis/redis
+      - run: go get github.com/stretchr/testify
+
+      - run:
+          name: Run unit tests
+          command: go test -v ./...
+
+      - save_cache:
+          key: v1-pkg-cache
+          paths:
+            - "/go/pkg"
