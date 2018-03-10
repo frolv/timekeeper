@@ -26,10 +26,7 @@ jobs:
           keys:
             - v1-pkg-cache
 
-      - run: go get github.com/gin-gonic/gin
-      - run: go get github.com/jinzhu/gorm
-      - run: go get github.com/lib/pq
-      - run: go get github.com/go-redis/redis
+      - run: go get -v ./...
       - run: go get github.com/stretchr/testify
 
       - run:
