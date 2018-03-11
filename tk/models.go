@@ -1,6 +1,10 @@
 package tk
 
-import "github.com/jinzhu/gorm"
+import (
+	"time"
+
+	"github.com/jinzhu/gorm"
+)
 
 type Account struct {
 	gorm.Model
@@ -9,8 +13,11 @@ type Account struct {
 }
 
 type Datapoint struct {
-	gorm.Model
-	AccountID   uint `gorm:"type:bigint REFERENCES accounts(id)"`
+	ID          uint      `gorm:"primary_key"`
+	CreatedAt   time.Time `gorm:"index"`
+	UpdatedAt   time.Time
+	DeletedAt   *time.Time `gorm:"index"`
+	AccountID   uint       `gorm:"type:bigint REFERENCES accounts(id)"`
 	Account     Account
 	SkillLevels []SkillLevel
 }

@@ -9,6 +9,7 @@ const (
 	OSAPIError
 	RecentUpdate
 	InvalidPeriod
+	NoPointsInPeriod
 )
 
 type TKError struct {
@@ -27,6 +28,7 @@ var errorMessages = map[int]string{
 	OSAPIError:       "Problem with OSRS API",
 	RecentUpdate:     "Account was recently updated",
 	InvalidPeriod:    "Invalid period",
+	NoPointsInPeriod: "No datapoints for account in specified period",
 }
 
 func Create(code int) *TKError {

@@ -11,6 +11,7 @@ func Initialize(router *gin.Engine) {
 	v1 := router.Group("/v1")
 	v1.GET("/update/:username", updateAccount)
 	v1.GET("/stats/:username", lookupStats)
+	v1.GET("/track/:username", trackAccount)
 }
 
 // Return an HTTP status code and a JSON response for the given error.
@@ -26,7 +27,7 @@ func errorToResponse(err error) (int, gin.H) {
 		switch ecode {
 		case tkerr.InvalidUsername, tkerr.RecentUpdate, tkerr.InvalidPeriod:
 			code = http.StatusBadRequest
-		case tkerr.InvalidAccount, tkerr.UntrackedAccount:
+		case tkerr.InvalidAccount, tkerr.UntrackedAccount, tkerr.NoPointsInPeriod:
 			code = http.StatusNotFound
 		case tkerr.OSAPIError:
 			code = http.StatusBadGateway

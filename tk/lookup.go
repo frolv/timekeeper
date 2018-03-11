@@ -2,6 +2,8 @@ package tk
 
 import (
 	"errors"
+	"fmt"
+	"time"
 
 	"github.com/jinzhu/gorm"
 	"timekeeper/lib/tkerr"
@@ -19,7 +21,7 @@ func GetAccount(username string) (*Account, error) {
 }
 
 // Fetches the latest datapoint for an account.
-func GetLatestDatapoint(acc *Account) (*Datapoint, error) {
+func LatestDatapoint(acc *Account) (*Datapoint, error) {
 	var dp Datapoint
 
 	if acc == nil {
@@ -31,4 +33,35 @@ func GetLatestDatapoint(acc *Account) (*Datapoint, error) {
 	}).Where("account_id = ?", acc.ID).Last(&dp)
 
 	return &dp, nil
+}
+
+// Fetches the first and last datapoints within a specified time period.
+func BoundaryPoints(acc *Account, start time.Time) ([]Datapoint, error) {
+	if acc == nil {
+		return nil, errors.New("No account provided")
+	}
+
+	dps := make([]Datapoint, 2)
+
+	// Fetch the first datapoint in the period with its skills, and then the
+	// most recent datapoint. This takes 4 queries, which isn't ideal, but nor
+	// is it bad enough that it needs to be optimized (at least for now).
+	// We've got redis in front of this anyway.
+	err := db.Preload("SkillLevels").Where(
+		"account_id = ? AND created_at >= ?", acc.ID, start,
+	).First(&dps[0]).Error
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return nil, tkerr.Create(tkerr.NoPointsInPeriod)
+		} else {
+			fmt.Println(err)
+			return nil, err
+		}
+	}
+
+	db.Preload("SkillLevels", func(db *gorm.DB) *gorm.DB {
+		return db.Order(`"skill_levels"."id" ASC`)
+	}).Where("account_id = ?", acc.ID).Last(&dps[1])
+
+	return dps, nil
 }

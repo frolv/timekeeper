@@ -36,13 +36,25 @@ func init() {
 	accKeys = make(map[string][]string)
 }
 
+const DefaultExpiration = 5 * time.Minute
+
+// Write a value to the cache with the default expiration period.
 func Set(key string, val string, acc *tk.Account) {
 	if acc != nil {
 		accKeys[acc.Username] = append(accKeys[acc.Username], key)
 	}
-	client.Set(key, val, 5*time.Minute)
+	client.Set(key, val, DefaultExpiration)
 }
 
+// Write a value to the cache with a specified expiration period.
+func SetExpiration(key string, val string, exp time.Duration, acc *tk.Account) {
+	if acc != nil {
+		accKeys[acc.Username] = append(accKeys[acc.Username], key)
+	}
+	client.Set(key, val, exp)
+}
+
+// Read the value for the specified key from the cache.
 func Get(key string) (string, error) {
 	return client.Get(key).Result()
 }

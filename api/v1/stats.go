@@ -31,7 +31,7 @@ func lookupStats(c *gin.Context) {
 
 	val, err := cache.Get(cacheKey)
 	if err == nil {
-		c.String(200, val)
+		c.Data(200, "application/json; charset=utf-8", []byte(val))
 		return
 	}
 
@@ -42,7 +42,7 @@ func lookupStats(c *gin.Context) {
 		return
 	}
 
-	dp, _ := tk.GetLatestDatapoint(acc)
+	dp, _ := tk.LatestDatapoint(acc)
 	res := StatsResponse{
 		Username:   acc.Username,
 		LastUpdate: dp.CreatedAt.Unix(),
@@ -64,5 +64,5 @@ func lookupStats(c *gin.Context) {
 	s := string(j)
 	cache.Set(cacheKey, s, acc)
 
-	c.String(200, s)
+	c.Data(200, "application/json; charset=utf-8", j)
 }
