@@ -2,7 +2,6 @@ package apiv1
 
 import (
 	"fmt"
-	"time"
 
 	"encoding/json"
 	"github.com/gin-gonic/gin"
@@ -22,7 +21,7 @@ type SkillInfo struct {
 
 type StatsResponse struct {
 	Username   string      `json:"username"`
-	LastUpdate time.Time   `json:"lastUpdate"`
+	LastUpdate int64       `json:"lastUpdate"`
 	Skills     []SkillInfo `json:"skills"`
 }
 
@@ -46,7 +45,7 @@ func lookupStats(c *gin.Context) {
 	dp, _ := tk.GetLatestDatapoint(acc)
 	res := StatsResponse{
 		Username:   acc.Username,
-		LastUpdate: dp.CreatedAt,
+		LastUpdate: dp.CreatedAt.Unix(),
 		Skills:     make([]SkillInfo, osrs.SkillCount),
 	}
 
