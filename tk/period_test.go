@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"timekeeper/lib/tkerr"
 )
 
 func TestParsePeriod(t *testing.T) {
@@ -36,11 +37,26 @@ func TestParsePeriod(t *testing.T) {
 	assert.Equal(t, time.Duration(365*24*time.Hour), d, "1y should equal 365 days")
 
 	d, err = ParsePeriod("1z")
-	assert.NotNil(t, err, "z is an invalid period unit")
+	if assert.NotNil(t, err, "z is an invalid period unit") {
+		if assert.IsType(t, &tkerr.TKError{}, err) {
+			e, _ := err.(*tkerr.TKError)
+			assert.Equal(t, tkerr.InvalidPeriod, e.Code)
+		}
+	}
 
 	d, err = ParsePeriod("3")
-	assert.NotNil(t, err, "periods must provide a unit")
+	if assert.NotNil(t, err, "periods must provide a unit") {
+		if assert.IsType(t, &tkerr.TKError{}, err) {
+			e, _ := err.(*tkerr.TKError)
+			assert.Equal(t, tkerr.InvalidPeriod, e.Code)
+		}
+	}
 
 	d, err = ParsePeriod("1000y")
-	assert.NotNil(t, err, "periods cannot not overflow a time.Duration")
+	if assert.NotNil(t, err, "periods cannot not overflow a time.Duration") {
+		if assert.IsType(t, &tkerr.TKError{}, err) {
+			e, _ := err.(*tkerr.TKError)
+			assert.Equal(t, tkerr.InvalidPeriod, e.Code)
+		}
+	}
 }

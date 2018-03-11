@@ -38,7 +38,8 @@ func lookupStats(c *gin.Context) {
 
 	acc, err := tk.GetAccount(username)
 	if err != nil {
-		c.JSON(404, gin.H{"status": "error", "errorMessage": err.Error()})
+		code, json := errorToResponse(err)
+		c.JSON(code, json)
 		return
 	}
 

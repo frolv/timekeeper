@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/jinzhu/gorm"
+	"timekeeper/lib/tkerr"
 )
 
 // Look up an account by username.
@@ -11,7 +12,7 @@ func GetAccount(username string) (*Account, error) {
 	var account Account
 
 	if err := db.First(&account, "username = ?", username).Error; err != nil {
-		return nil, errors.New("Account has not been tracked")
+		return nil, tkerr.Create(tkerr.UntrackedAccount)
 	} else {
 		return &account, nil
 	}

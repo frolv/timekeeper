@@ -1,11 +1,12 @@
 package tk
 
 import (
-	"errors"
 	"math"
 	"regexp"
 	"strconv"
 	"time"
+
+	"timekeeper/lib/tkerr"
 )
 
 var periodRegex *regexp.Regexp
@@ -20,7 +21,7 @@ func init() {
 // years, respectively.
 func ParsePeriod(period string) (time.Duration, error) {
 	if !periodRegex.MatchString(period) {
-		return 0, errors.New("Invalid period")
+		return 0, tkerr.Create(tkerr.InvalidPeriod)
 	}
 
 	// Regex guarantees this will succeed
@@ -44,8 +45,8 @@ func ParsePeriod(period string) (time.Duration, error) {
 	}
 
 	// Guard against overflow
-	if int64(c) > math.MaxInt64 / int64(d) {
-		return 0, errors.New("Invalid period")
+	if int64(c) > math.MaxInt64/int64(d) {
+		return 0, tkerr.Create(tkerr.InvalidPeriod)
 	}
 
 	return time.Duration(c) * d, nil

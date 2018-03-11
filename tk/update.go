@@ -6,28 +6,13 @@ import (
 
 	"github.com/jinzhu/gorm"
 	"timekeeper/lib/osrs"
+	"timekeeper/lib/tkerr"
 )
-
-type UpdateError struct {
-	Type    int
-	Message string
-}
-
-const (
-	UEInvalidAccount  = osrs.HEInvalidAccount
-	UEAPIError        = osrs.HEAPIError
-	UEInvalidUsername = iota
-	UERecentUpdate
-)
-
-func (e *UpdateError) Error() string {
-	return fmt.Sprintf("[%d] %s", e.Type, e.Message)
-}
 
 // Create a new datapoint for the account with the specified username.
 func UpdateAccount(username string) (*Account, error) {
 	if !validUsername(username) {
-		return nil, &UpdateError{UEInvalidUsername, "Invalid username"}
+		return nil, tkerr.Create(tkerr.InvalidUsername)
 	}
 
 	var account Account
@@ -46,20 +31,12 @@ func UpdateAccount(username string) (*Account, error) {
 		db.Where("account_id = ?", account.ID).Last(&dp)
 
 		if time.Since(dp.CreatedAt) < time.Duration(30*time.Second) {
-			return nil, &UpdateError{
-				UERecentUpdate,
-				"Account updated less than 30s ago",
-			}
+			return nil, tkerr.Create(tkerr.RecentUpdate)
 		}
 	}
 
 	if err := createDatapoint(&account, first); err != nil {
-		if e, ok := err.(*osrs.HiscoreError); ok {
-			return nil, &UpdateError{e.Type, e.Message}
-		} else {
-			fmt.Println(err.Error())
-			return nil, err
-		}
+		return nil, err
 	}
 
 	return &account, nil

@@ -1,12 +1,13 @@
 package osrs
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"timekeeper/lib/tkerr"
 )
 
 const osrsAPI = "http://services.runescape.com/m=hiscore_oldschool/index_lite.ws?player="
@@ -17,20 +18,6 @@ type SkillInfo struct {
 	Level      int
 	Rank       int
 	Hours      float64
-}
-
-type HiscoreError struct {
-	Type    int
-	Message string
-}
-
-const (
-	HEInvalidAccount = 1
-	HEAPIError       = iota
-)
-
-func (e *HiscoreError) Error() string {
-	return fmt.Sprintf("[%d] %s", e.Type, e.Message)
 }
 
 func HiscoreLookup(username string) ([]SkillInfo, error) {
@@ -44,9 +31,9 @@ func HiscoreLookup(username string) ([]SkillInfo, error) {
 	}
 
 	if res.StatusCode == http.StatusNotFound {
-		return nil, &HiscoreError{HEInvalidAccount, "Account does not exist"}
+		return nil, tkerr.Create(tkerr.InvalidAccount)
 	} else if res.StatusCode != http.StatusOK {
-		return nil, &HiscoreError{HEAPIError, "Problem with OSRS API"}
+		return nil, tkerr.Create(tkerr.OSAPIError)
 	}
 
 	defer res.Body.Close()
@@ -71,12 +58,12 @@ func parseHSResponse(contents string) ([]SkillInfo, error) {
 	for i >= 0 {
 		fields := strings.Split(ss[i], ",")
 		if len(fields) != 3 {
-			return nil, &HiscoreError{HEAPIError, "Problem with OSRS API"}
+			return nil, tkerr.Create(tkerr.OSAPIError)
 		}
 
 		xp, err := strconv.Atoi(fields[2])
 		if err != nil {
-			return nil, &HiscoreError{HEAPIError, "Problem with OSRS API"}
+			return nil, tkerr.Create(tkerr.OSAPIError)
 		}
 		if xp == -1 {
 			xp = 0
@@ -92,7 +79,7 @@ func parseHSResponse(contents string) ([]SkillInfo, error) {
 
 		rank, err := strconv.Atoi(fields[0])
 		if err != nil {
-			return nil, &HiscoreError{HEAPIError, "Problem with OSRS API"}
+			return nil, tkerr.Create(tkerr.OSAPIError)
 		}
 
 		skills[i] = SkillInfo{
