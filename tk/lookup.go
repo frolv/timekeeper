@@ -36,7 +36,7 @@ func LatestDatapoint(acc *Account) (*Datapoint, error) {
 }
 
 // Fetches the first and last datapoints within a specified time period.
-func BoundaryPoints(acc *Account, start time.Time) ([]Datapoint, error) {
+func BoundaryPoints(acc *Account, start time.Time, end time.Time) ([]Datapoint, error) {
 	if acc == nil {
 		return nil, errors.New("No account provided")
 	}
@@ -48,7 +48,8 @@ func BoundaryPoints(acc *Account, start time.Time) ([]Datapoint, error) {
 	// is it bad enough that it needs to be optimized (at least for now).
 	// We've got redis in front of this anyway.
 	err := db.Preload("SkillLevels").Where(
-		"account_id = ? AND created_at >= ?", acc.ID, start,
+		"account_id = ? AND created_at >= ? AND created_at <= ?",
+		acc.ID, start, end,
 	).First(&dps[0]).Error
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
@@ -61,7 +62,7 @@ func BoundaryPoints(acc *Account, start time.Time) ([]Datapoint, error) {
 
 	db.Preload("SkillLevels", func(db *gorm.DB) *gorm.DB {
 		return db.Order(`"skill_levels"."id" ASC`)
-	}).Where("account_id = ?", acc.ID).Last(&dps[1])
+	}).Where("account_id = ? AND created_at <= ?", acc.ID, end).Last(&dps[1])
 
 	return dps, nil
 }

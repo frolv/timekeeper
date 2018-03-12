@@ -27,8 +27,15 @@ type TrackResponse struct {
 }
 
 func trackAccount(c *gin.Context) {
+	period, err := tk.ParsePeriod(c.DefaultQuery("period", "7d"))
+	if err != nil {
+		code, json := errorToResponse(err)
+		c.JSON(code, json)
+		return
+	}
+
 	username := c.Param("username")
-	cacheKey := fmt.Sprintf("track_%s", username)
+	cacheKey := fmt.Sprintf("track_%s_%d", username, period)
 
 	val, err := cache.Get(cacheKey)
 	if err == nil {
@@ -43,16 +50,10 @@ func trackAccount(c *gin.Context) {
 		return
 	}
 
-	period, err := tk.ParsePeriod(c.DefaultQuery("period", "7d"))
-	if err != nil {
-		code, json := errorToResponse(err)
-		c.JSON(code, json)
-		return
-	}
+	end := time.Now()
+	start := end.Add(-period)
 
-	start := time.Now().Add(-period)
-
-	dps, err := tk.BoundaryPoints(acc, start)
+	dps, err := tk.BoundaryPoints(acc, start, end)
 	if err != nil {
 		code, json := errorToResponse(err)
 		c.JSON(code, json)
