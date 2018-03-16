@@ -44,7 +44,7 @@ func lookupStats(c *gin.Context) {
 
 	dp, _ := tk.LatestDatapoint(acc)
 	res := StatsResponse{
-		Username:   acc.Username,
+		Username:   acc.DisplayName,
 		LastUpdate: dp.CreatedAt.Unix(),
 		Skills:     make([]SkillInfo, osrs.SkillCount),
 	}

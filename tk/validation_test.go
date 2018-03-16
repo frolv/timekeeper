@@ -4,20 +4,46 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"timekeeper/lib/tkerr"
 )
 
-func TestValidUsername(t *testing.T) {
-	var b bool
+func TestCanonicalizeUsername(t *testing.T) {
+	var str string
+	var err error
 
-	b = validUsername("hello")
-	assert.Equal(t, true, b, "username `hello' should be valid")
+	str, err = canonicalizeUsername("hello")
+	assert.Nil(t, err)
+	assert.Equal(t, "hello", str, "`hello' is already in canonical form")
 
-	b = validUsername("")
-	assert.Equal(t, false, b, "usernames cannot be empty")
+	str, err = canonicalizeUsername("HeLLo123")
+	assert.Nil(t, err)
+	assert.Equal(t, "hello123", str, "uppercase letters should be lowercased")
 
-	b = validUsername("abcdefghijklm")
-	assert.Equal(t, false, b, "usernames have a max length of 12")
+	str, err = canonicalizeUsername("Hello World")
+	assert.Nil(t, err)
+	assert.Equal(t, "hello_world", str, "spaces should be converted to underscores")
 
-	b = validUsername("a28_i#")
-	assert.Equal(t, false, b, "usernames cannot contain special characters")
+	str, err = canonicalizeUsername("")
+	if assert.NotNil(t, err, "usernames cannot be empty") {
+		if assert.IsType(t, &tkerr.TKError{}, err) {
+			e, _ := err.(*tkerr.TKError)
+			assert.Equal(t, tkerr.InvalidUsername, e.Code)
+		}
+	}
+
+	str, err = canonicalizeUsername("abcdefghijklm")
+	if assert.NotNil(t, err, "usernames have a max length of 12") {
+		if assert.IsType(t, &tkerr.TKError{}, err) {
+			e, _ := err.(*tkerr.TKError)
+			assert.Equal(t, tkerr.InvalidUsername, e.Code)
+		}
+	}
+
+	str, err = canonicalizeUsername("a28_i#")
+	if assert.NotNil(t, err, "usernames cannot contain special characters") {
+		if assert.IsType(t, &tkerr.TKError{}, err) {
+			e, _ := err.(*tkerr.TKError)
+			assert.Equal(t, tkerr.InvalidUsername, e.Code)
+		}
+	}
 }

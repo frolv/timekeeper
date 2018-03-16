@@ -11,16 +11,20 @@ import (
 
 // Create a new datapoint for the account with the specified username.
 func UpdateAccount(username string) (*Account, error) {
-	if !validUsername(username) {
-		return nil, tkerr.Create(tkerr.InvalidUsername)
+	name, err := canonicalizeUsername(username)
+	if err != nil {
+		return nil, err
 	}
 
 	var account Account
 	first := false
 
-	if err := db.First(&account, "username = ?", username).Error; err != nil {
+	if err := db.First(&account, "username = ?", name).Error; err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			account = Account{Username: username}
+			account = Account{
+				Username:    name,
+				DisplayName: username,
+			}
 			first = true
 		} else {
 			fmt.Println(err.Error())

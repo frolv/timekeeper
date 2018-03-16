@@ -1,8 +1,8 @@
 package apiv1
 
 import (
-	"fmt"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -61,7 +61,7 @@ func trackAccount(c *gin.Context) {
 	}
 
 	res := TrackResponse{
-		Username:    acc.Username,
+		Username:    acc.DisplayName,
 		PeriodStart: dps[0].CreatedAt.Unix(),
 		PeriodEnd:   dps[1].CreatedAt.Unix(),
 		Skills:      make([]TrackInfo, osrs.SkillCount),
@@ -85,7 +85,7 @@ func trackAccount(c *gin.Context) {
 	// If the first datapoint in the period expires soon,
 	// make sure that the cache entry expires with it.
 	tte := dps[0].CreatedAt.Sub(start)
-	if (tte < cache.DefaultExpiration) {
+	if tte < cache.DefaultExpiration {
 		cache.SetExpiration(cacheKey, s, tte, acc)
 	} else {
 		cache.Set(cacheKey, s, acc)

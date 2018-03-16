@@ -8,8 +8,9 @@ import (
 
 type Account struct {
 	gorm.Model
-	Username   string `gorm:"unique_index"`
-	Datapoints []Datapoint
+	Username    string `gorm:"unique_index"`
+	DisplayName string `gorm:"size:16"`
+	Datapoints  []Datapoint
 }
 
 type Datapoint struct {

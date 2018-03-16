@@ -13,6 +13,10 @@ import (
 func GetAccount(username string) (*Account, error) {
 	var account Account
 
+	username, err := canonicalizeUsername(username)
+	if err != nil {
+		return nil, err
+	}
 	if err := db.First(&account, "username = ?", username).Error; err != nil {
 		return nil, tkerr.Create(tkerr.UntrackedAccount)
 	} else {
