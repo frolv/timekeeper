@@ -12,6 +12,7 @@ func Initialize(router *gin.Engine) {
 	v1.GET("/update/:username", updateAccount)
 	v1.GET("/stats/:username", lookupStats)
 	v1.GET("/track/:username", trackAccount)
+	v1.GET("/suggest", suggest)
 }
 
 // Return an HTTP status code and a JSON response for the given error.

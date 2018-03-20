@@ -28,5 +28,7 @@ func init() {
 	}
 
 	fmt.Println("Database connection initialized")
+
 	performMigrations()
+	autoSuggestInit()
 }
