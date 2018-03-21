@@ -56,6 +56,7 @@ func createDatapoint(account *Account, first bool) error {
 
 	if first {
 		db.Create(account)
+		addSuggestion(account)
 	}
 
 	dp := Datapoint{AccountID: account.ID}

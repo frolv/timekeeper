@@ -17,9 +17,13 @@ func autoSuggestInit() {
 	displayNames = make(map[string]string)
 
 	for _, acc := range accounts {
-		names.Add(acc.Username)
-		displayNames[acc.Username] = acc.DisplayName
+		addSuggestion(&acc)
 	}
+}
+
+func addSuggestion(acc *Account) {
+	names.Add(acc.Username)
+	displayNames[acc.Username] = acc.DisplayName
 }
 
 // Return the first `num` usernames which start with the given query string.
